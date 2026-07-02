@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Equipos Campamento</title>
+<style>
+  :root{
+    --bg:#0a0f1e;
+    --panel:#111827;
+    --panel2:#151b30;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --line:rgba(255,255,255,.08);
+    --accent:#818cf8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #121a33 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 30px 20px 60px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 34px;
+  }
+
+  .header-inner {
+    display: inline-block;
+    background: linear-gradient(135deg, #1a1f35 0%, #0d1226 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 34px 56px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+  }
+
+  .header-inner::before,
+  .header-inner::after {
+    content: '';
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .header-inner::before {
+    top: -70px;
+    left: -60px;
+    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+  }
+
+  .header-inner::after {
+    bottom: -70px;
+    right: -60px;
+    background: radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%);
+  }
+
+  .header h1 {
+    font-size: 2.6rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    letter-spacing: .6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .summary {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .sum-card {
+    background: linear-gradient(135deg, #1e2540, #151b30);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 18px 28px;
+    text-align: center;
+    min-width: 140px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.25);
+    transition: transform .2s ease;
+  }
+
+  .sum-card:hover { transform: translateY(-3px); }
+
+  .sum-card .num {
+    font-size: 2.05rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .sum-card .lbl {
+    font-size: 0.72rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    margin-top: 6px;
+  }
+
+  .note {
+    max-width: 1120px;
+    margin: 0 auto 18px;
+    color: #a5b4fc;
+    font-size: 0.9rem;
+    text-align: center;
+    opacity: 0.9;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
+    letter-spacing: .4px;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: rgba(129,140,248,0.2);
+    border-color: #818cf8;
+    color: #c7d2fe;
+  }
+
+  .search-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .search-input {
+    width: 320px;
+    max-width: calc(100vw - 220px);
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02);
+    color: #fff;
+    outline: none;
+    font-size: 0.92rem;
+  }
+
+  .search-input::placeholder { color: #94a3b8; opacity: 0.7; }
+
+  .search-clear {
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #94a3b8;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .search-clear:hover { background: rgba(255,255,255,0.06); color: #fff; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 22px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .team-card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: fadeUp 0.45s ease both;
+  }
+
+  .team-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .team-header {
+    padding: 20px 20px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .team-header::after {
+    content: '';
+    position: absolute;
+    top: -35px;
+    right: -35px;
+    width: 130px;
+    height: 130px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .team-header.rojo     { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  .team-header.celeste  { background: linear-gradient(135deg, #0e7490, #06b6d4); }
+  .team-header.verde    { background: linear-gradient(135deg, #14532d, #16a34a); }
+  .team-header.gris     { background: linear-gradient(135deg, #334155, #64748b); }
+  .team-header.morado   { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+  .team-header.amarillo { background: linear-gradient(135deg, #78350f, #d97706); }
+  .team-header.naranja  { background: linear-gradient(135deg, #9a3412, #ea580c); }
+  .team-header.turquesa { background: linear-gradient(135deg, #155e75, #14b8a6); }
+
+  .team-title {
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .captain-banner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 10px 20px rgba(0,0,0,0.12);
+    backdrop-filter: blur(5px);
+  }
+
+  .captain-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .captain-text {
+    min-width: 0;
+  }
+
+  .captain-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 1.7px;
+    opacity: 0.85;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+
+  .captain-name {
+    font-size: 0.95rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .team-stats-row {
+    display: flex;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 6px 10px;
+    text-align: center;
+    flex: 1 1 22%;
+    min-width: 72px;
+    backdrop-filter: blur(4px);
+  }
+
+  .stat-pill .sv {
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+
+  .stat-pill .sl {
+    font-size: 0.6rem;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  .team-body { padding: 16px 18px 20px; }
+
+  .gender-section { margin-bottom: 12px; }
+
+  .gender-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .gender-label span { font-size: 0.9rem; }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    transition: background 0.15s;
+  }
+
+  .player-row:hover { background: rgba(255,255,255,0.04); }
+
+  .player-name {
+    font-size: 0.84rem;
+    color: #cbd5e1;
+    font-weight: 500;
+    line-height: 1.2;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .player-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .player-age {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .vl-badge {
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+  }
+
+  .vl1 { background: rgba(100,116,139,0.22); color: #cbd5e1; border: 1px solid rgba(100,116,139,0.35); }
+  .vl2 { background: rgba(59,130,246,0.20); color: #93c5fd; border: 1px solid rgba(59,130,246,0.32); }
+  .vl3 { background: rgba(239,68,68,0.20); color: #fca5a5; border: 1px solid rgba(239,68,68,0.32); }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .footer {
+    text-align: center;
+    color: #64748b;
+    font-size: .82rem;
+    margin-top: 18px;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 18px 12px 40px; }
+
+    .header-inner { padding: 24px 20px; }
+    .header h1 { font-size: 1.75rem; letter-spacing: 1px; }
+    .header p { font-size: 0.78rem; }
+
+    .summary { gap: 10px; }
+    .sum-card { padding: 14px 16px; min-width: 100px; }
+    .sum-card .num { font-size: 1.5rem; }
+    .sum-card .lbl { font-size: 0.6rem; }
+
+    .filters { gap: 6px; }
+    .filter-btn { font-size: 0.7rem; padding: 6px 12px; }
+
+    .grid { grid-template-columns: 1fr; gap: 16px; }
+
+    .team-header { padding: 16px; }
+    .team-title { font-size: 1rem; }
+
+    .captain-banner {
+      padding: 8px 10px;
+      gap: 8px;
+    }
+
+    .captain-icon {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+    }
+
+    .captain-name { font-size: 0.82rem; }
+
+    .team-stats-row { gap: 6px; }
+    .stat-pill {
+      flex: 1 1 48%;
+      padding: 6px;
+      min-width: 0;
+    }
+    .stat-pill .sv { font-size: 0.85rem; }
+    .stat-pill .sl { font-size: 0.54rem; }
+
+    .team-body { padding: 12px; }
+    .player-name { font-size: 0.75rem; }
+    .player-age { font-size: 0.65rem; }
+    .vl-badge { font-size: 0.6rem; padding: 2px 6px; }
+    .gender-label { font-size: 0.6rem; }
+
+    .search-input { max-width: 180px; }
+
+    .legend { gap: 12px; }
+    .legend-item { font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>⚽ Equipos Campamento</h1>
+    <p>85 participantes · 8 grupos · Balanceados por VL, edad y género</p>
+  </div>
+</div>
+
+<div class="summary" id="summary"></div>
+
+<div class="note">
+  Distribución actualizada al contexto del campamento. La repetición de iglesias se minimizó lo más posible.
+</div>
+
+<div class="controls">
+  <div class="filters" id="filters"></div>
+
+  <div class="search-box">
+    <input id="searchInput" class="search-input" type="text" placeholder="Buscar por nombre, edad o iglesia" />
+    <button id="clearSearch" class="search-clear" title="Limpiar búsqueda">✕</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1"></div> VL1 — Nivel alto</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#93c5fd"></div> VL2 — Nivel medio</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fca5a5"></div> VL3 — Nivel básico</div>
+</div>
+
+<div class="footer">Diseño actualizado con el contexto actual del campamento.</div>
+
+<script>
+  const teams = [
+    {
+      title: "Grupo 1",
+      color: "rojo",
+      captain: "Joselyn",
+      players: [
+        { name: "Andrey Morera Castillo", age: 18, gender: "H", vl: 2, church: "Río Cuarto" },
+        { name: "Amber Samantha Castro Madrigal", age: 15, gender: "M", vl: 3, church: "El Shadday San Isidro" },
+        { name: "Brittany Paola Robles Ramirez", age: 18, gender: "M", vl: 1, church: "Fuente de vida Los Angeles" },
+        { name: "Fabián Paniagua Araya", age: 15, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Jordy Mena Soza", age: 14, gender: "H", vl: 3, church: "Santa R Pocosol Monte" },
+        { name: "Branscen Arroliga Soto", age: 14, gender: "H", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Jose Luis Bogarin Salas", age: 19, gender: "H", vl: 3, church: "Vida Nueva" },
+        { name: "Angie Renauld Quiros", age: 17, gender: "M", vl: 3, church: "La Trinidad" },
+        { name: "Sharith Nahomy Cerda Ángulo", age: 16, gender: "M", vl: 1, church: "Fuente de vida Los Angeles" },
+        { name: "Adrián chaco sequeira", age: 13, gender: "H", vl: 2, church: "El Shaddai Coquital" },
+        { name: "Sara Valentina Vargas Báez", age: 13, gender: "M", vl: 2, church: "Sta Rosa La Palmera Rios de Agua Viva" }
+      ]
+    },
+    {
+      title: "Grupo 2",
+      color: "celeste",
+      captain: "María Angel",
+      players: [
+        { name: "Yuridia Maricela Ramirez Jimenéz", age: 18, gender: "M", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Mathias Vargas Alvarado", age: 13, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Samantha Madrigal Arce", age: 19, gender: "M", vl: 3, church: "La Trinidad" },
+        { name: "Nixon mejias viachica", age: 13, gender: "H", vl: 3, church: "Vida Nueva" },
+        { name: "Ashley Patricia Villalobos Salazar", age: 21, gender: "M", vl: 2, church: "Río Cuarto" },
+        { name: "Oriana Godínez Sandoval", age: 15, gender: "M", vl: 2, church: "Fortuna" },
+        { name: "Rachel Salazar Araya", age: 17, gender: "M", vl: 3, church: "Río Cuarto" },
+        { name: "Freyman Jesús Jiménez Carrillo", age: 14, gender: "H", vl: 2, church: "Santa R Pocosol Monte" },
+        { name: "Justin Rodrigo Delgado Orozco", age: 17, gender: "H", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Dereck Guevara Mora", age: 13, gender: "H", vl: 3, church: "Sta Rosa La Palmera Rios de Agua Viva" },
+        { name: "sofia ramirez salazar", age: 15, gender: "M", vl: 2, church: "El Shadday San Isidro" }
+      ]
+    },
+    {
+      title: "Grupo 3",
+      color: "verde",
+      captain: "Reichel",
+      players: [
+        { name: "Alexander Durán Oporta", age: 12, gender: "H", vl: 2, church: "Vida Nueva" },
+        { name: "Milagro Gamboa Salas", age: 17, gender: "M", vl: 2, church: "La Trinidad" },
+        { name: "Josué Alejandro García Cajina", age: 19, gender: "H", vl: 2, church: "Los Chiles" },
+        { name: "Luis Ramírez Barrantes", age: 18, gender: "H", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Alexis Peñaranda", age: 13, gender: "H", vl: 3, church: "Vida Nueva" },
+        { name: "Sofía Rodríguez", age: 14, gender: "M", vl: 2, church: "Santa R Pocosol Monte" },
+        { name: "Hillary Robles Ramírez", age: 15, gender: "M", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "María Belén Céspedes Solís", age: 18, gender: "M", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Dariana Paniagua Araya", age: 13, gender: "M", vl: 3, church: "Río Cuarto" },
+        { name: "Dilan Duarte Vargas", age: 19, gender: "H", vl: 3, church: "Ríos de Gloria Sonafluca" },
+        { name: "José David Ramirez Nuñez", age: 14, gender: "H", vl: 3, church: "Sta Rosa La Palmera Rios de Agua Viva" }
+      ]
+    },
+    {
+      title: "Grupo 4",
+      color: "gris",
+      captain: "Diana Paola",
+      players: [
+        { name: "Kristyn Dayana Galeano Reyes", age: 14, gender: "M", vl: 1, church: "Santa R Pocosol Monte" },
+        { name: "Rachel Sofia Gonzalez Medina", age: 16, gender: "M", vl: 2, church: "La Trinidad" },
+        { name: "Daniel Jiménez Vargas", age: 16, gender: "H", vl: 2, church: "Río Cuarto" },
+        { name: "STEFAN CASTRO VARGAS", age: 15, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Camila Siles Leon", age: 15, gender: "M", vl: 2, church: "Santa R Pocosol Monte" },
+        { name: "Camila Ramirez Salazar", age: 16, gender: "M", vl: 2, church: "El Shadday San Isidro" },
+        { name: "German Fernández Calderón", age: 41, gender: "H", vl: 3, church: "El Shadday San Isidro" },
+        { name: "Carlos Steven Durán Méndez", age: 15, gender: "H", vl: 3, church: "Sta Rosa La Palmera Rios de Agua Viva" },
+        { name: "Alisson Naomy Alfaro Guerrero", age: 13, gender: "M", vl: 1, church: "Fuente de vida Los Angeles" },
+        { name: "Wilson Jose Ferrufino Obando", age: 21, gender: "H", vl: 3, church: "Santa R Pocosol Monte" },
+        { name: "Jonathan madrigal Zuñiga", age: 20, gender: "H", vl: 2, church: "Vida Nueva" }
+      ]
+    },
+    {
+      title: "Grupo 5",
+      color: "morado",
+      captain: "Diana",
+      players: [
+        { name: "Valeska Cedeño Vargas", age: 12, gender: "M", vl: 1, church: "Santa R Pocosol Monte" },
+        { name: "Laura Raquel Telica Alvarez", age: 13, gender: "M", vl: 3, church: "Río Cuarto" },
+        { name: "Eyder Beltrán Masis", age: 16, gender: "H", vl: 2, church: "Fortuna" },
+        { name: "Jimena Sequeira Reyes", age: 17, gender: "M", vl: 2, church: "El Shaddai Coquital" },
+        { name: "Randall Miranda Sequeira", age: 15, gender: "H", vl: 2, church: "El Shaddai Coquital" },
+        { name: "Kaleb Gonzalez Cruz", age: 18, gender: "H", vl: 3, church: "La Trinidad" },
+        { name: "Lisbeth Cabezas Hernández", age: 15, gender: "M", vl: 2, church: "Santa R Pocosol Monte" },
+        { name: "Jimena Campos Campos", age: 17, gender: "M", vl: 2, church: "Vida Nueva" },
+        { name: "Carlos José Monterrey Peña", age: 17, gender: "H", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Andrés Esquivel Gómez", age: 21, gender: "H", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Marcos Isaac López Romero", age: 15, gender: "H", vl: 3, church: "Río Cuarto" }
+      ]
+    },
+    {
+      title: "Grupo 6",
+      color: "amarillo",
+      captain: "Brandon",
+      players: [
+        { name: "Cristian José Morera castillo", age: 20, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Angie Lizbeth Durán Oporta", age: 15, gender: "M", vl: 2, church: "Vida Nueva" },
+        { name: "Alondra Valentina Mendoza Martinez", age: 17, gender: "M", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Cristian Marhias Barrantes Hernández", age: 13, gender: "H", vl: 2, church: "Río Cuarto" },
+        { name: "Zaid Arce Morales", age: 13, gender: "H", vl: 3, church: "Santa R Pocosol Monte" },
+        { name: "Ernesto Sequeira Reyes", age: 11, gender: "H", vl: 2, church: "El Shaddai Coquital" },
+        { name: "Fiorella Sofia Marin Cabrera", age: 18, gender: "M", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Issy Adyeline Alfaro Durán", age: 14, gender: "M", vl: 2, church: "Fortuna" },
+        { name: "Sofia Chaves Padilla", age: 17, gender: "M", vl: 1, church: "Sta Rosa La Palmera Rios de Agua Viva" },
+        { name: "Kenneth Argüello Salazar", age: 19, gender: "H", vl: 3, church: "El Shadday San Isidro" }
+      ]
+    },
+    {
+      title: "Grupo 7",
+      color: "naranja",
+      captain: "Yosibaldo",
+      players: [
+        { name: "Geliana Paniagua Mejías", age: 16, gender: "M", vl: 2, church: "Río Cuarto" },
+        { name: "Abimelec Martinez Cruz", age: 17, gender: "H", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Sebastián Molina reyes", age: 14, gender: "H", vl: 3, church: "Santa R Pocosol Monte" },
+        { name: "Jocabeth Ocampo Carmona", age: 13, gender: "M", vl: 3, church: "Fortuna" },
+        { name: "Owen Chaves Vargas", age: 19, gender: "H", vl: 1, church: "Sta Rosa La Palmera Rios de Agua Viva" },
+        { name: "Aarón Josué Peralta Vásquez", age: 12, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Joel sebastian", age: 13, gender: "H", vl: 3, church: "Vida Nueva" },
+        { name: "Dayron cerdas Godínez", age: 14, gender: "H", vl: 1, church: "Los Chiles" },
+        { name: "Débora Jiménez Vargas", age: 19, gender: "M", vl: 2, church: "Río Cuarto" },
+        { name: "Sara Castillo Espinoza", age: 14, gender: "M", vl: 2, church: "Río Cuarto" }
+      ]
+    },
+    {
+      title: "Grupo 8",
+      color: "turquesa",
+      captain: "Ignacio",
+      players: [
+        { name: "Brithany Betanco Morera", age: 12, gender: "M", vl: 3, church: "Río Cuarto" },
+        { name: "Ashley Jimena Benavides Cruz", age: 14, gender: "M", vl: 3, church: "Fuente de vida Los Angeles" },
+        { name: "Isaac Felipe Cedeño Muñoz", age: 16, gender: "H", vl: 2, church: "Santa R Pocosol Monte" },
+        { name: "Anisson Adriana Viachica Urbina", age: 13, gender: "M", vl: 2, church: "Casa De Dios Pital" },
+        { name: "Johan Andrés Gómez Lazo", age: 16, gender: "H", vl: 2, church: "El Shadday San Isidro" },
+        { name: "Ashley Nicole Gamboa Jiménez", age: 13, gender: "M", vl: 2, church: "Río Cuarto" },
+        { name: "Marlene Carolina Castillo Martinez", age: 15, gender: "M", vl: 1, church: "El Abanico Espiritu de Vida" },
+        { name: "Randy Gustavo Arce Solano", age: 15, gender: "H", vl: 3, church: "Río Cuarto" },
+        { name: "Eithan Uziel Bolaños Pérez", age: 14, gender: "H", vl: 2, church: "Fuente de vida Los Angeles" },
+        { name: "Esteban Leonardo Arias Soto", age: 23, gender: "H", vl: 3, church: "La Trinidad" }
+      ]
+    }
+  ];
+
+  const filterState = { vl: null, gender: null, search: '' };
+
+  const summary = document.getElementById('summary');
+  const filters = document.getElementById('filters');
+  const grid = document.getElementById('grid');
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+
+  const allPlayers = teams.flatMap(team => team.players);
+
+  const genderCounts = allPlayers.reduce((acc, p) => {
+    acc[p.gender] = (acc[p.gender] || 0) + 1;
+    return acc;
+  }, { H: 0, M: 0 });
+
+  const totalVL = allPlayers.reduce((sum, p) => sum + p.vl, 0);
+  const avgAge = allPlayers.reduce((sum, p) => sum + p.age, 0) / allPlayers.length;
+
+  function renderSummary() {
+    summary.innerHTML = `
+      <div class="sum-card"><div class="num">${allPlayers.length}</div><div class="lbl">Participantes</div></div>
+      <div class="sum-card"><div class="num">${teams.length}</div><div class="lbl">Equipos</div></div>
+      <div class="sum-card"><div class="num">${totalVL}</div><div class="lbl">VL Total</div></div>
+      <div class="sum-card"><div class="num">${avgAge.toFixed(1)}</div><div class="lbl">Edad Promedio</div></div>
+      <div class="sum-card"><div class="num">${genderCounts.H}H / ${genderCounts.M}M</div><div class="lbl">Género</div></div>
+    `;
+  }
+
+  function renderFilters() {
+    const buttons = [
+      { label: 'Todos', action: 'all', cls: 'active' },
+      { label: '🔘 VL 1', action: 'vl1' },
+      { label: '🔵 VL 2', action: 'vl2' },
+      { label: '🔴 VL 3', action: 'vl3' },
+      { label: '👦 Hombres', action: 'male' },
+      { label: '👧 Mujeres', action: 'female' }
+    ];
+
+    filters.innerHTML = buttons.map(btn => `
+      <button class="filter-btn ${btn.cls || ''}" data-action="${btn.action}">
+        ${btn.label}
+      </button>
+    `).join('');
+  }
+
+  function playerRow(player) {
+    return `
+      <div class="player-row" data-vl="${player.vl}" data-gender="${player.gender}" data-church="${player.church.toLowerCase()}">
+        <div class="player-name" title="${player.church}">
+          ${player.name}
+        </div>
+        <div class="player-right">
+          <span class="player-age">${player.age}</span>
+          <span class="vl-badge vl${player.vl}">VL${player.vl}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function teamStats(team) {
+    const total = team.players.length;
+    const men = team.players.filter(p => p.gender === 'H').length;
+    const women = team.players.filter(p => p.gender === 'M').length;
+    const vl = team.players.reduce((sum, p) => sum + p.vl, 0);
+    const avg = team.players.reduce((sum, p) => sum + p.age, 0) / total;
+    return { total, men, women, vl, avg };
+  }
+
+  function renderTeams() {
+    grid.innerHTML = teams.map((team, idx) => {
+      const s = teamStats(team);
+
+      const captain = team.players.find(p => p.name === team.captain);
+      const remainingPlayers = team.players.filter(p => p.name !== team.captain);
+      const orderedPlayers = captain ? [captain, ...remainingPlayers] : team.players;
+
+      const menRows = orderedPlayers
+        .filter(p => p.gender === 'H')
+        .map(p => playerRow(p))
+        .join('');
+
+      const womenRows = orderedPlayers
+        .filter(p => p.gender === 'M')
+        .map(p => playerRow(p))
+        .join('');
+
+      return `
+        <div class="team-card" style="animation-delay:${(idx + 1) * 0.04}s">
+          <div class="team-header ${team.color}">
+            <div class="team-title">${team.title}</div>
+
+            <div class="captain-banner">
+              <div class="captain-icon">👑</div>
+              <div class="captain-text">
+                <div class="captain-label">Líder del grupo</div>
+                <div class="captain-name">${team.captain}</div>
+              </div>
+            </div>
+
+            <div class="team-stats-row">
+              <div class="stat-pill"><div class="sv">${s.total}</div><div class="sl">Jugadores</div></div>
+              <div class="stat-pill"><div class="sv">${s.men}H/${s.women}M</div><div class="sl">Género</div></div>
+              <div class="stat-pill"><div class="sv">${s.vl}</div><div class="sl">VL Total</div></div>
+              <div class="stat-pill"><div class="sv">${s.avg.toFixed(1)}</div><div class="sl">Edad Prom</div></div>
+            </div>
+          </div>
+          <div class="team-body">
+            <div class="gender-section">
+              <div class="gender-label"><span>👦</span> Hombres</div>
+              ${menRows}
+            </div>
+            <div class="gender-section">
+              <div class="gender-label"><span>👧</span> Mujeres</div>
+              ${womenRows}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function setActive(action) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.filter-btn[data-action="${action}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  function applyFilters() {
+    const searchText = filterState.search.trim().toLowerCase();
+
+    document.querySelectorAll('.team-card').forEach(card => {
+      const rows = card.querySelectorAll('.player-row');
+      let anyVisible = false;
+
+      rows.forEach(row => {
+        const name = row.querySelector('.player-name')?.textContent.toLowerCase() || '';
+        const age = row.querySelector('.player-age')?.textContent.trim() || '';
+        const vl = parseInt(row.dataset.vl, 10);
+        const gender = row.dataset.gender;
+        const church = row.dataset.church || '';
+
+        let matchesSearch = true;
+        if (searchText !== '') {
+          if (/^\d+$/.test(searchText)) {
+            matchesSearch = age === searchText;
+          } else {
+            matchesSearch = name.includes(searchText) || church.includes(searchText);
+          }
+        }
+
+        const matchesVL = filterState.vl ? vl === filterState.vl : true;
+        const matchesGender = filterState.gender ? gender === filterState.gender : true;
+
+        const visible = matchesSearch && matchesVL && matchesGender;
+        row.style.display = visible ? 'flex' : 'none';
+        if (visible) anyVisible = true;
+      });
+
+      card.style.display = anyVisible ? 'block' : 'none';
+    });
+  }
+
+  filters.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+
+    if (action === 'all') {
+      filterState.vl = null;
+      filterState.gender = null;
+      setActive('all');
+    }
+
+    if (action === 'vl1') {
+      filterState.vl = filterState.vl === 1 ? null : 1;
+      filterState.gender = null;
+      setActive(filterState.vl ? 'vl1' : 'all');
+    }
+
+    if (action === 'vl2') {
+      filterState.vl = filterState.vl === 2 ? null : 2;
+      filterState.gender = null;
+      setActive(filterState.vl ? 'vl2' : 'all');
+    }
+
+    if (action === 'vl3') {
+      filterState.vl = filterState.vl === 3 ? null : 3;
+      filterState.gender = null;
+      setActive(filterState.vl ? 'vl3' : 'all');
+    }
+
+    if (action === 'male') {
+      filterState.gender = filterState.gender === 'H' ? null : 'H';
+      filterState.vl = null;
+      setActive(filterState.gender ? 'male' : 'all');
+    }
+
+    if (action === 'female') {
+      filterState.gender = filterState.gender === 'M' ? null : 'M';
+      filterState.vl = null;
+      setActive(filterState.gender ? 'female' : 'all');
+    }
+
+    applyFilters();
+  });
+
+  searchInput.addEventListener('input', () => {
+    filterState.search = searchInput.value || '';
+    applyFilters();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    filterState.search = '';
+    applyFilters();
+    searchInput.focus();
+  });
+
+  renderSummary();
+  renderFilters();
+  renderTeams();
+  applyFilters();
+</script>
+</body>
+</html>
