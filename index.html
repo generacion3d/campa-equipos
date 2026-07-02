@@ -257,7 +257,7 @@
   .team-header.verde    { background: linear-gradient(135deg, #14532d, #16a34a); }
   .team-header.gris     { background: linear-gradient(135deg, #334155, #64748b); }
   .team-header.morado   { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
-  .team-header.amarillo { background: linear-gradient(135deg, #78350f, #d97706); }
+  .team-header.amarillo { background: linear-gradient(135deg, #ecd02e, #656b12); }
   .team-header.naranja  { background: linear-gradient(135deg, #9a3412, #ea580c); }
   .team-header.turquesa { background: linear-gradient(135deg, #155e75, #14b8a6); }
 
@@ -446,6 +446,40 @@
     background: rgba(239,68,68,0.20);
     color: #fca5a5;
     border: 1px solid rgba(239,68,68,0.32);
+  }
+
+  .captain-section {
+    margin-bottom: 14px;
+  }
+
+  .captain-row {
+    background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .captain-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.24);
+    color: #fff;
+  }
+
+  .cap-badge {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.22);
+    font-size: 0.62rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
   }
 
   .legend {
@@ -751,6 +785,7 @@
     summary.innerHTML = `
       <div class="sum-card"><div class="num">${allPlayers.length}</div><div class="lbl">Participantes</div></div>
       <div class="sum-card"><div class="num">${teams.length}</div><div class="lbl">Equipos</div></div>
+      <div class="sum-card"><div class="num">8</div><div class="lbl">Capitanes</div></div>
       <div class="sum-card"><div class="num">${vlCounts[1]}</div><div class="lbl">VL1</div></div>
       <div class="sum-card"><div class="num">${vlCounts[2]}</div><div class="lbl">VL2</div></div>
       <div class="sum-card"><div class="num">${vlCounts[3]}</div><div class="lbl">VL3</div></div>
@@ -791,6 +826,21 @@
     `;
   }
 
+  function captainRow(name) {
+    return `
+      <div class="player-row leader captain-row" data-captain-name="${name.toLowerCase()}">
+        <div class="player-name">
+          <span class="captain-tag">👑 CAPITÁN</span>
+          <span>${name}</span>
+        </div>
+        <div class="player-right">
+          <span class="player-age">—</span>
+          <span class="cap-badge">LÍDER</span>
+        </div>
+      </div>
+    `;
+  }
+
   function teamStats(team) {
     const total = team.players.length;
     const men = team.players.filter(p => p.gender === 'H').length;
@@ -806,25 +856,21 @@
     grid.innerHTML = teams.map((team, idx) => {
       const s = teamStats(team);
 
-      const captain = team.players.find(p => p.name === team.captain);
-      const remainingPlayers = team.players.filter(p => p.name !== team.captain);
-      const orderedPlayers = captain ? [captain, ...remainingPlayers] : team.players;
-
-      const menRows = orderedPlayers
+      const menRows = team.players
         .filter(p => p.gender === 'H')
-        .map(p => playerRow(p, captain && p.name === captain.name))
+        .map(p => playerRow(p, false))
         .join('');
 
-      const womenRows = orderedPlayers
+      const womenRows = team.players
         .filter(p => p.gender === 'M')
-        .map(p => playerRow(p, captain && p.name === captain.name))
+        .map(p => playerRow(p, false))
         .join('');
 
       return `
         <div class="team-card" style="animation-delay:${(idx + 1) * 0.04}s">
           <div class="team-header ${team.color}">
             <div class="team-title">${team.title}</div>
-            <div class="team-subtitle">Líder primero · jugadores normales · solo un líder por grupo</div>
+            <div class="team-subtitle">Capitán destacado · jugadores normales · solo un líder por grupo</div>
 
             <div class="team-stats-row">
               <div class="stat-pill"><div class="sv">${s.total}</div><div class="sl">Jugadores</div></div>
@@ -840,6 +886,11 @@
           </div>
 
           <div class="team-body">
+            <div class="captain-section">
+              <div class="gender-label"><span>👑</span> Capitán del grupo</div>
+              ${captainRow(team.captain)}
+            </div>
+
             <div class="gender-section">
               <div class="gender-label"><span>👦</span> Hombres</div>
               ${menRows}
@@ -867,6 +918,7 @@
 
     document.querySelectorAll('.team-card').forEach(card => {
       const rows = card.querySelectorAll('.player-row');
+      const captainName = card.querySelector('.captain-row')?.dataset.captainName || '';
       let anyVisible = false;
 
       rows.forEach(row => {
@@ -893,8 +945,9 @@
         if (visible) anyVisible = true;
       });
 
-      card.style.display = anyVisible ? 'block' : 'none';
-      if (anyVisible) visibleCards++;
+      const captainMatchesSearch = searchText !== '' && captainName.includes(searchText);
+      card.style.display = (anyVisible || captainMatchesSearch) ? 'block' : 'none';
+      if (card.style.display !== 'none') visibleCards++;
     });
 
     emptyState.style.display = visibleCards === 0 ? 'block' : 'none';
